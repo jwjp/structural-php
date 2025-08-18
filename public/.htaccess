@@ -1,0 +1,24 @@
+# 폴더 검색 금지
+Options -Indexes
+
+# 서버 정보 숨기기 (httpd.conf 파일에 적용)
+# ServerSignature Off
+# ServerTokens Prod
+
+# .git, .gitignore, .env 등 숨김 파일 보호
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
+<IfModule mod_rewrite.c>
+    # URL 재작성 엔진 켜기
+    RewriteEngine On
+
+    # 실제 파일이나 디렉토리가 존재하면 그 파일을 직접 사용
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+
+    # 위 조건에 해당하지 않는 모든 요청을 index.php로 전달
+    # [L]은 규칙 처리를 여기서 중단하라는 의미, [QSA]는 기존 쿼리스트링을 유지하라는 의미
+    RewriteRule ^ index.php [L,QSA]
+</IfModule>
