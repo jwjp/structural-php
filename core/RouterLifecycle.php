@@ -5,7 +5,7 @@ namespace App\core;
 use App\config\Ini;
 use Exception;
 
-abstract class RouterImpl {
+abstract class RouterLifecycle {
     /**
      * .ini 환경변수 값
      *
@@ -174,7 +174,7 @@ abstract class RouterImpl {
      * @param string $uri
      * @param string $cls
      * @param string $fn
-     * @return RouterImpl
+     * @return RouterLifecycle
      * @throws Exception
      */
     protected function exec(string $uri, string $cls, string $fn): static {
@@ -223,7 +223,7 @@ abstract class RouterImpl {
     /**
      * 라우팅 분석 및 요청에 맞는 메서드 호출
      *
-     * @return RouterImpl
+     * @return RouterLifecycle
      * @throws Exception
      */
     protected function anlz(): static {

@@ -4,16 +4,26 @@ namespace App\Controllers\Sample;
 
 use App\core\Controller;
 use App\Models\Sample\SampleModel;
+use App\Services\Sample\SampleService;
 use Exception;
+use JetBrains\PhpStorm\NoReturn;
 
 class SampleController extends Controller {
+    /**
+     * @return void
+     */
+    #[NoReturn] public function index(): void {
+        $var = ['title' => 'title', 'content' => 'content'];
+        $this->view('sample/index', $var);
+    }
+
     /**
      * @return false|int
      * @throws Exception
      */
     public function createFoo(): false|int {
-        $sample = new SampleModel();
-        return $sample->createFoo($this->var['message']);
+        $sampleService = new SampleService();
+        return $sampleService->createFoo($this->var['message']);
     }
 
     /**
@@ -21,16 +31,16 @@ class SampleController extends Controller {
      * @throws Exception
      */
     public function readFooById(): false|array {
-        $sample = new SampleModel();
-        return $sample->readFooById($this->param['fooId']);
+        $sampleService = new SampleService();
+        return $sampleService->readFooById($this->param['fooId']);
     }
 
     /**
      * @return array|false
      */
     public function readFooAll(): array|false {
-        $sample = new SampleModel();
-        return $sample->readFooAll();
+        $sampleService = new SampleService();
+        return $sampleService->readFooAll();
     }
 
     /**
@@ -38,8 +48,8 @@ class SampleController extends Controller {
      * @throws Exception
      */
     public function updateFooById(): false|int {
-        $sample = new SampleModel();
-        return $sample->updateFooById($this->var['message'], $this->param['id']);
+        $sampleService = new SampleService();
+        return $sampleService->updateFooById($this->var['message'], $this->param['id']);
     }
 
     /**
@@ -47,8 +57,8 @@ class SampleController extends Controller {
      * @throws Exception
      */
     public function deleteFooById(): false|int {
-        $sample = new SampleModel();
-        return $sample->deleteFooById($this->param['id']);
+        $sampleService = new SampleService();
+        return $sampleService->deleteFooById($this->param['id']);
     }
 
     /**
@@ -56,8 +66,8 @@ class SampleController extends Controller {
      * @throws Exception
      */
     public function createBarWithFooId(): false|int {
-        $sample = new SampleModel();
-        return $sample->createBarWithFooId($this->var['comment'], $this->var['fooId']);
+        $sampleService = new SampleService();
+        return $sampleService->createBarWithFooId($this->var['comment'], $this->var['fooId']);
     }
 
     /**
@@ -65,16 +75,16 @@ class SampleController extends Controller {
      * @throws Exception
      */
     public function readBarById(): false|array {
-        $sample = new SampleModel();
-        return $sample->readBarById($this->param['id']);
+        $sampleService = new SampleService();
+        return $sampleService->readBarById($this->param['id']);
     }
 
     /**
      * @return false|array
      */
     public function readBarAll(): false|array {
-        $sample = new SampleModel();
-        return $sample->readBarAll();
+        $sampleService = new SampleService();
+        return $sampleService->readBarAll();
     }
 
     /**
@@ -82,8 +92,8 @@ class SampleController extends Controller {
      * @throws Exception
      */
     public function updateBarById(): false|int {
-        $sample = new SampleModel();
-        return $sample->updateBarById($this->var['comment'], $this->param['id']);
+        $sampleService = new SampleService();
+        return $sampleService->updateBarById($this->var['comment'], $this->param['id']);
     }
 
     /**
@@ -91,8 +101,8 @@ class SampleController extends Controller {
      * @throws Exception
      */
     public function deleteBarById(): false|int {
-        $sample = new SampleModel();
-        return $sample->deleteBarById($this->param['id']);
+        $sampleService = new SampleService();
+        return $sampleService->deleteBarById($this->param['id']);
     }
 
     /**
@@ -100,8 +110,8 @@ class SampleController extends Controller {
      * @throws Exception
      */
     public function readFooBarByFooIdWithQB(): array {
-        $sample = new SampleModel();
-        return $sample->readFooBarByFooIdWithQB($this->param['fooId']);
+        $sampleService = new SampleService();
+        return $sampleService->readFooBarByFooIdWithQB($this->param['fooId']);
     }
 
     /**
@@ -109,8 +119,8 @@ class SampleController extends Controller {
      * @throws Exception
      */
     public function createFooWithQB(): false|int|array|string {
-        $sample = new SampleModel();
-        return $sample->createFooWithQB($this->var['message']);
+        $sampleService = new SampleService();
+        return $sampleService->createFooWithQB($this->var['message']);
     }
 
     /**
@@ -118,8 +128,8 @@ class SampleController extends Controller {
      * @throws Exception
      */
     public function createFooBarWithQB(): bool {
-        $sample = new SampleModel();
-        return $sample->createFooBarWithQB($this->var['fooMessage'], $this->var['barComment']);
+        $sampleService = new SampleService();
+        return $sampleService->createFooBarWithQB($this->var['fooMessage'], $this->var['barComment']);
     }
 
     /**
@@ -127,7 +137,7 @@ class SampleController extends Controller {
      * @throws Exception
      */
     public function deleteFooByIdWithQB(): false|int|array|string {
-        $sample = new SampleModel();
-        return $sample->deleteFooByIdWithQB($this->param['fooId']);
+        $sampleService = new SampleService();
+        return $sampleService->deleteFooByIdWithQB($this->param['fooId']);
     }
 }

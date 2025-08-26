@@ -37,4 +37,6 @@ abstract class Database {
     public function queryBuilder(): QueryBuilder {
         return new QueryBuilder($this->pdo);
     }
+
+    // TODO: 쿼리 실행문 정리 및 Logger 활용
 }

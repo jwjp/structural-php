@@ -6,7 +6,8 @@
     "psr-4": {
       "App\\": "src/",
       "App\\config\\": "config/",
-      "App\\core\\": "core/"
+      "App\\core\\": "core/",
+      "App\\system\\": "system/"
     }
   },
   "require": {

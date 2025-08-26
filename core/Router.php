@@ -6,7 +6,7 @@ use App\Controllers\Sample\SampleController;
 use App\Controllers\Sample\SampleViewController;
 use Exception;
 
-class Router extends RouterImpl {
+class Router extends RouterLifecycle {
     public function __construct() {
         parent::__construct();
     }
@@ -23,6 +23,7 @@ class Router extends RouterImpl {
 
     /** @throws Exception */
     protected function get(): static {
+        $this->exec('/', SampleController::class, 'index');
         $this->exec('/foo', SampleController::class, 'readFooAll');
         $this->exec('/foo/{fooId}', SampleController::class, 'readFooById');
         $this->exec('/bar', SampleController::class, 'readBarAll');
