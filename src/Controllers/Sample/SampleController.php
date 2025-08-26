@@ -2,9 +2,8 @@
 
 namespace App\Controllers\Sample;
 
-use App\core\Controller;
-use App\Models\Sample\SampleModel;
 use App\Services\Sample\SampleService;
+use App\system\Controller;
 use Exception;
 use JetBrains\PhpStorm\NoReturn;
 

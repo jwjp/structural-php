@@ -1,9 +1,10 @@
 <?php
 
-namespace App\core;
+namespace App;
 
 use App\Controllers\Sample\SampleController;
 use App\Controllers\Sample\SampleViewController;
+use App\system\RouterLifecycle;
 use Exception;
 
 class Router extends RouterLifecycle {

@@ -1,8 +1,7 @@
 <?php
 
-namespace App\core;
+namespace App\system;
 
-use App\config\Ini;
 use PDO;
 
 abstract class Database {

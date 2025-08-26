@@ -1,6 +1,6 @@
 <?php
 
-namespace App\config;
+namespace App\system;
 
 class Ini {
     /**
@@ -11,7 +11,7 @@ class Ini {
     private array|false $ini;
 
     public function __construct() {
-        $this->ini = parse_ini_file(__DIR__ . '/.ini', true);
+        $this->ini = parse_ini_file(__DIR__ . '/../.ini', true);
     }
 
     public function get(string $key): array {

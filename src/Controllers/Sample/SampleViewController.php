@@ -2,7 +2,7 @@
 
 namespace App\Controllers\Sample;
 
-use App\core\Controller;
+use App\system\Controller;
 use JetBrains\PhpStorm\NoReturn;
 
 class SampleViewController extends Controller {

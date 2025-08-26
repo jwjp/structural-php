@@ -23,6 +23,6 @@ set_exception_handler(function(Throwable $exception) {
 require __DIR__ . '/../vendor/autoload.php';
 
 // 라우터 실행
-new \App\core\Router();
+new App\Router();
 
 // TODO: composer dump-autoload 명령어 실행 (composer.json 확인)
