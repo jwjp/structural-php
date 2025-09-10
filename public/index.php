@@ -20,7 +20,7 @@ set_exception_handler(function(Throwable $exception) {
 });
 
 // Composer 오토로더 불러오기 (경로 기준은 현재 파일 위치)
-require __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 
 // 라우터 실행
 new App\Router();
