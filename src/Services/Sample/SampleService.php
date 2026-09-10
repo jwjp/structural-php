@@ -3,224 +3,109 @@
 namespace App\Services\Sample;
 
 use App\Models\Sample\SampleModel;
-use Exception;
+use App\system\HttpException;
 
 class SampleService {
-    public function __construct() {
+    public function __construct(private ?SampleModel $sampleModel = null) {
     }
 
-    /**
-     * @param string $message
-     * @return false|int
-     * @throws Exception
-     */
-    public function createFoo(string $message): false|int {
-        if (empty($message)) {
-            throw new Exception('입력 값이 올바르지 않습니다.', 400);
-        }
-
-        $message = htmlspecialchars($message, ENT_QUOTES);
-        if (strlen($message) >= 150) {
-            throw new Exception('메시지의 제한 길이 150자를 초과하였습니다.', 400);
-        }
-
-        $sampleModel = new SampleModel();
-        return $sampleModel->createFoo($message);
+    public function createFoo(mixed $message): false|int {
+        $message = $this->text($message, 'message');
+        return $this->model()->createFoo($message);
     }
 
-    /**
-     * @param int $id
-     * @return false|array
-     * @throws Exception
-     */
-    public function readFooById(int $id): false|array {
-        if (empty($id)) {
-            throw new Exception('입력 값이 올바르지 않습니다.', 400);
-        }
-
-        $sampleModel = new SampleModel();
-        return $sampleModel->readFooById($id);
+    public function readFooById(mixed $id): false|array {
+        $id = $this->positiveId($id, 'fooId');
+        return $this->model()->readFooById($id);
     }
 
-    /**
-     * @return false|array
-     */
     public function readFooAll(): false|array {
-        $sampleModel = new SampleModel();
-        return $sampleModel->readFooAll();
+        return $this->model()->readFooAll();
     }
 
-    /**
-     * @param string $message
-     * @param int $id
-     * @return false|int
-     * @throws Exception
-     */
-    public function updateFooById(string $message, int $id): false|int {
-        if (empty($id) || empty($message)) {
-            throw new Exception('입력 값이 올바르지 않습니다.', 400);
-        }
-
-        $message = htmlspecialchars($message, ENT_QUOTES);
-        if (strlen($message) >= 150) {
-            throw new Exception('메시지의 제한 길이 150자를 초과하였습니다.', 400);
-        }
-
-        $sampleModel = new SampleModel();
-        return $sampleModel->updateFooById($message, $id);
+    public function updateFooById(mixed $message, mixed $id): false|int {
+        $id = $this->positiveId($id, 'fooId');
+        $message = $this->text($message, 'message');
+        return $this->model()->updateFooById($message, $id);
     }
 
-    /**
-     * @param int $id
-     * @return false|int
-     * @throws Exception
-     */
-    public function deleteFooById(int $id): false|int {
-        if (empty($id)) {
-            throw new Exception('입력 값이 올바르지 않습니다.', 400);
-        }
-
-        $sampleModel = new SampleModel();
-        return $sampleModel->deleteFooById($id);
+    public function deleteFooById(mixed $id): false|int {
+        $id = $this->positiveId($id, 'fooId');
+        return $this->model()->deleteFooById($id);
     }
 
-    /**
-     * @param string $comment
-     * @param int $fooId
-     * @return false|int
-     * @throws Exception
-     */
-    public function createBarWithFooId(string $comment, int $fooId): false|int {
-        if (empty($fooId) || empty($comment)) {
-            throw new Exception('입력 값이 올바르지 않습니다.', 400);
-        }
-
-        $comment = htmlspecialchars($comment, ENT_QUOTES);
-        if (strlen($comment) >= 150) {
-            throw new Exception('메시지의 제한 길이 150자를 초과하였습니다.', 400);
-        }
-
-        $sampleModel = new SampleModel();
-        return $sampleModel->createBarWithFooId($comment, $fooId);
+    public function createBarWithFooId(mixed $comment, mixed $fooId): false|int {
+        $fooId = $this->positiveId($fooId, 'fooId');
+        $comment = $this->text($comment, 'comment');
+        return $this->model()->createBarWithFooId($comment, $fooId);
     }
 
-    /**
-     * @param int $id
-     * @return false|array
-     * @throws Exception
-     */
-    public function readBarById(int $id): false|array {
-        if (empty($id)) {
-            throw new Exception('입력 값이 올바르지 않습니다.', 400);
-        }
-
-        $sampleModel = new SampleModel();
-        return $sampleModel->readBarById($id);
+    public function readBarById(mixed $id): false|array {
+        $id = $this->positiveId($id, 'barId');
+        return $this->model()->readBarById($id);
     }
 
-    /**
-     * @return false|array
-     */
     public function readBarAll(): false|array {
-        $sampleModel = new SampleModel();
-        return $sampleModel->readBarAll();
+        return $this->model()->readBarAll();
     }
 
-    /**
-     * @param string $comment
-     * @param int $id
-     * @return false|int
-     * @throws Exception
-     */
-    public function updateBarById(string $comment, int $id): false|int {
-        if (empty($id) || empty($comment)) {
-            throw new Exception('입력 값이 올바르지 않습니다.', 400);
-        }
-
-        $comment = htmlspecialchars($comment, ENT_QUOTES);
-        if (strlen($comment) >= 150) {
-            throw new Exception('메시지의 제한 길이 150자를 초과하였습니다.', 400);
-        }
-
-        $sampleModel = new SampleModel();
-        return $sampleModel->updateBarById($comment, $id);
+    public function updateBarById(mixed $comment, mixed $id): false|int {
+        $id = $this->positiveId($id, 'barId');
+        $comment = $this->text($comment, 'comment');
+        return $this->model()->updateBarById($comment, $id);
     }
 
-    /**
-     * @param int $id
-     * @return false|int
-     * @throws Exception
-     */
-    public function deleteBarById(int $id): false|int {
-        if (empty($id)) {
-            throw new Exception('입력 값이 올바르지 않습니다.', 400);
-        }
-
-        $sampleModel = new SampleModel();
-        return $sampleModel->deleteBarById($id);
+    public function deleteBarById(mixed $id): false|int {
+        $id = $this->positiveId($id, 'barId');
+        return $this->model()->deleteBarById($id);
     }
 
-    /**
-     * @param int $fooId
-     * @return array
-     * @throws Exception
-     */
-    public function readFooBarByFooIdWithQB(int $fooId): array {
-        if (empty($fooId)) {
-            throw new Exception('입력 값이 올바르지 않습니다.', 400);
-        }
-
-        $sampleModel = new SampleModel();
-        return $sampleModel->readFooBarByFooIdWithQB($fooId);
+    public function readFooBarByFooIdWithQB(mixed $fooId): false|array {
+        $fooId = $this->positiveId($fooId, 'fooId');
+        return $this->model()->readFooBarByFooIdWithQB($fooId);
     }
 
-    /**
-     * @param string $message
-     * @return false|array|int|string
-     * @throws Exception
-     */
-    public function createFooWithQB(string $message): false|array|int|string {
-        if (empty($message)) {
-            throw new Exception('입력 값이 올바르지 않습니다.', 400);
-        }
-
-        $convertedMessage = htmlspecialchars($message, ENT_QUOTES);
-        if (strlen($convertedMessage) >= 150) {
-            throw new Exception('메시지의 제한 길이 150자를 초과하였습니다.', 400);
-        }
-
-        $sampleModel = new SampleModel();
-        return $sampleModel->createFooWithQB($convertedMessage);
+    public function createFooWithQB(mixed $message): false|array|int|string {
+        $message = $this->text($message, 'message');
+        return $this->model()->createFooWithQB($message);
     }
 
-    /**
-     * @param string $fooMessage
-     * @param string $barComment
-     * @return bool
-     * @throws Exception
-     */
-    public function createFooBarWithQB(string $fooMessage, string $barComment): bool {
-        if (empty($fooMessage) || empty($barComment)) {
-            throw new Exception('입력 값이 올바르지 않습니다.', 400);
-        }
-
-        $convertedMessage = htmlspecialchars($fooMessage, ENT_QUOTES);
-        $convertedComment = htmlspecialchars($barComment, ENT_QUOTES);
-        if (strlen($convertedMessage) >= 150 || strlen($convertedComment) >= 150) {
-            throw new Exception('메시지의 제한 길이 150자를 초과하였습니다.', 400);
-        }
-
-        $sampleModel = new SampleModel();
-        return $sampleModel->createFooBarWithQB($convertedMessage, $convertedComment);
+    public function createFooBarWithQB(mixed $fooMessage, mixed $barComment): bool {
+        $fooMessage = $this->text($fooMessage, 'fooMessage');
+        $barComment = $this->text($barComment, 'barComment');
+        return $this->model()->createFooBarWithQB($fooMessage, $barComment);
     }
 
-    /**
-     * @param string $fooId
-     * @return false|array|int|string
-     * @throws Exception
-     */
-    public function deleteFooByIdWithQB(string $fooId): false|array|int|string {
-        $sampleModel = new SampleModel();
-        return $sampleModel->deleteFooByIdWithQB($fooId);
+    public function deleteFooByIdWithQB(mixed $fooId): false|array|int|string {
+        $fooId = $this->positiveId($fooId, 'fooId');
+        return $this->model()->deleteFooByIdWithQB($fooId);
+    }
+
+    private function model(): SampleModel {
+        // Validation completes before the first database connection is opened.
+        return $this->sampleModel ??= new SampleModel();
+    }
+
+    private function positiveId(mixed $value, string $field): int {
+        if ((!is_int($value) && !is_string($value))
+            || !preg_match('/^[1-9][0-9]*$/D', (string) $value)
+            || filter_var($value, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]) === false) {
+            throw new HttpException(400, "$field must be a positive integer.");
+        }
+
+        return (int) $value;
+    }
+
+    private function text(mixed $value, string $field): string {
+        if (!is_string($value) || !preg_match('//u', $value) || !preg_match('/[^\s\p{Z}]/u', $value)) {
+            throw new HttpException(400, "$field must be a non-empty UTF-8 string.");
+        }
+
+        // Count Unicode code points without requiring the mbstring extension.
+        if (preg_match_all('/./us', $value) > 150) {
+            throw new HttpException(400, "$field must not exceed 150 characters.");
+        }
+
+        return $value;
     }
 }

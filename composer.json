@@ -1,12 +1,19 @@
 {
   "name": "jiwonio/structural-php",
-  "description": "structural-php",
+  "description": "A dependency-free PHP MVC framework for exploring routing, request lifecycles and PDO queries",
+  "license": "Unlicense",
   "type": "project",
   "autoload": {
     "psr-4": {
       "App\\": "src/",
       "App\\system\\": "system/"
     }
+  },
+  "scripts": {
+    "test": "@php tests/run.php",
+    "test:mysql": "@php tests/mysql.php",
+    "lint": "@php tests/lint.php",
+    "serve": "@php -S 127.0.0.1:8000 -t public public/index.php"
   },
   "require": {
     "php": ">=8.2",

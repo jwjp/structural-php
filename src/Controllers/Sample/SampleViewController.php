@@ -3,11 +3,11 @@
 namespace App\Controllers\Sample;
 
 use App\system\Controller;
-use JetBrains\PhpStorm\NoReturn;
+use App\system\Response;
 
 class SampleViewController extends Controller {
-    #[NoReturn] public function index(): void {
+    public function index(): Response {
         $var = ['title' => 'Sample', 'content' => 'Sample Content'];
-        $this->view('sample/index', $var);
+        return $this->view('sample/index', $var);
     }
 }

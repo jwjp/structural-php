@@ -1,28 +1,26 @@
 <?php
+
+declare(strict_types=1);
+
+use App\system\HttpException;
+use App\system\Response;
+
+require_once dirname(__DIR__) . '/vendor/autoload.php';
+
 error_reporting(E_ALL);
-ini_set('display_errors', TRUE);
+ini_set('display_errors', '0');
 
-// PHP 에러를 exception 핸들러에서 처리
-set_error_handler(/** @throws ErrorException */function($errNo, $errStr, $errFile, $errLine) {
-    throw new ErrorException($errStr, $errNo, 0, $errFile, $errLine);
+set_error_handler(static function (int $severity, string $message, string $file, int $line): bool {
+    if (!(error_reporting() & $severity)) {
+        return false;
+    }
+    throw new ErrorException($message, 0, $severity, $file, $line);
 });
 
-set_exception_handler(function(Throwable $exception) {
-    header('Content-type: application/json');
-    http_response_code($exception->getCode());
-
-    exit(json_encode([
-        'message' => $exception->getMessage(),
-        'code' => $exception->getCode(),
-        'file' => $exception->getFile(),
-        'line' => $exception->getLine()
-    ], JSON_UNESCAPED_UNICODE));
+set_exception_handler(static function (Throwable $exception): void {
+    $status = $exception instanceof HttpException ? $exception->status() : 500;
+    $message = $status >= 500 ? HttpException::defaultMessage($status) : $exception->getMessage();
+    Response::json(['message' => $message, 'code' => $status], $status)->send();
 });
 
-// Composer 오토로더 불러오기 (경로 기준은 현재 파일 위치)
-require_once __DIR__ . '/../vendor/autoload.php';
-
-// 라우터 실행
 new App\Router();
-
-// TODO: composer dump-autoload 명령어 실행 (composer.json 확인)

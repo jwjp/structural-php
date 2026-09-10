@@ -2,60 +2,50 @@
 
 namespace App\system;
 
-use JetBrains\PhpStorm\NoReturn;
-
 abstract class Controller {
-    /**
-     * @var array|false $ini
-     */
-    protected array|false $ini;
-
-    /**
-     * GET 메소드의 Query-String
-     * POST, PATCH, PUT, DELETE 메소드의 Body-Content
-     *
-     * @var array
-     */
+    protected array $ini;
     protected array $var;
-
-    /**
-     * 요청 URL에서 {} 값을 리소스에서 찾은 값
-     * e.g. 요청 URL : /sports/soccer/player/7
-     *      리소스 :   /sports/{sportsId}/player/{playerId}
-     *      > ['sportsId' => 'soccer', 'playerId' => '7']
-     *
-     * @var array
-     */
     protected array $param;
+    protected ?Request $request;
 
-    /**
-     * @param array|false $ini .ini 환경변수 값
-     * @param array $var POST, PATCH, PUT, DELETE 메소드의 Body-Content
-     * @param array $param 요청 URL에서 {} 값을 리소스에서 찾은 값
-     */
-    public function __construct(array|false $ini = false, array $var = [], array $param = []) {
+    public function __construct(array $ini = [], array $var = [], array $param = [], ?Request $request = null) {
         $this->ini = $ini;
         $this->var = $var;
         $this->param = $param;
+        $this->request = $request;
     }
 
-    /**
-     * @param string $view 뷰어 파일 이름
-     * @param array $var 전달할 변수
-     * @param string $header 헤더 파일 이름
-     * @param string $footer 푸터 파일 이름
-     * @return void
-     */
-    #[NoReturn] protected function view(string $view, array $var = [], string $header = 'defaultHeader', string $footer = 'defaultFooter'): void {
-        // 전달할 값을 global 변수로 등록
-        foreach ($var as $key => $value) {
-            $GLOBALS[$key] = $value;
+    protected function view(string $view, array $var = [], string $header = 'defaultHeader', string $footer = 'defaultFooter'): Response {
+        $root = dirname(__DIR__) . '/public';
+        $files = [
+            $root . '/template/' . $this->viewName($header) . '.php',
+            $root . '/' . trim($view, '/') . '.php',
+            $root . '/template/' . $this->viewName($footer) . '.php',
+        ];
+
+        foreach ($files as $file) {
+            if (!is_file($file)) {
+                throw new HttpException(500, 'View file is missing.');
+            }
         }
 
-        // View 파일 생성
-        include_once $_SERVER['DOCUMENT_ROOT'] . '/template/' . $header . '.php';
-        include_once $_SERVER['DOCUMENT_ROOT'] . '/' . $view . '.php';
-        include_once $_SERVER['DOCUMENT_ROOT'] . '/template/' . $footer . '.php';
-        exit;
+        ob_start();
+        try {
+            extract($var, EXTR_SKIP);
+            foreach ($files as $file) {
+                include $file;
+            }
+            return Response::html((string) ob_get_clean());
+        } catch (\Throwable $exception) {
+            ob_end_clean();
+            throw $exception;
+        }
+    }
+
+    private function viewName(string $name): string {
+        if (!preg_match('/^[A-Za-z0-9_-]+$/', $name)) {
+            throw new HttpException(500, 'View name is invalid.');
+        }
+        return $name;
     }
 }

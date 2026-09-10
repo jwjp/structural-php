@@ -3,39 +3,61 @@
 namespace App\system;
 
 use PDO;
+use RuntimeException;
 
 abstract class Database {
-    /**
-     * @var PDO
-     */
     protected PDO $pdo;
 
-    /**
-     * 기본 설정 값
-     * 필요에 따라서 환경변수 지정 후 protected 변수로 사용
-     */
-    public function __construct() {
-        $ini = new Ini();
-        $database = $ini->get('DATABASE');
+    public function __construct(?PDO $pdo = null) {
+        if ($pdo !== null) {
+            $this->pdo = $pdo;
+            return;
+        }
+
+        $settings = (new Ini())->getAll()['DATABASE'] ?? [];
+        if (!is_array($settings)) {
+            throw new RuntimeException('DATABASE must be a configuration section.');
+        }
+        $environment = [
+            'HOST' => 'DB_HOST',
+            'PORT' => 'DB_PORT',
+            'DBNAME' => 'DB_DATABASE',
+            'USERNAME' => 'DB_USERNAME',
+            'PASSWORD' => 'DB_PASSWORD',
+        ];
+        foreach ($environment as $key => $name) {
+            $value = getenv($name);
+            if ($value !== false) {
+                $settings[$key] = $value;
+            }
+        }
+        $settings += ['HOST' => '127.0.0.1', 'PORT' => '3306'];
+        foreach (['HOST', 'DBNAME', 'USERNAME', 'PASSWORD'] as $key) {
+            if (!isset($settings[$key]) || !is_string($settings[$key])
+                || ($key !== 'PASSWORD' && $settings[$key] === '')) {
+                throw new RuntimeException("Database {$key} is required; configure .ini or the DB_* environment variables.");
+            }
+        }
+        $port = filter_var($settings['PORT'], FILTER_VALIDATE_INT, [
+            'options' => ['min_range' => 1, 'max_range' => 65535],
+        ]);
+        if ($port === false || preg_match('/[;\x00-\x1f]/', $settings['HOST'] . $settings['DBNAME'])) {
+            throw new RuntimeException('The database host, port or name is invalid.');
+        }
+
         $this->pdo = new PDO(
-            "mysql:host={$database['HOST']};dbname={$database['DBNAME']}",
-            $database['USERNAME'],
-            $database['PASSWORD']
+            "mysql:host={$settings['HOST']};port={$port};dbname={$settings['DBNAME']};charset=utf8mb4",
+            $settings['USERNAME'],
+            $settings['PASSWORD'],
+            [
+                PDO::ATTR_EMULATE_PREPARES => false,
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            ]
         );
-
-        // PDO 기능이 아닌 데이터베이스 자체의 Prepared Statement 사용
-        $this->pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-
-        // 에러가 발생하는 경우 Exception 던지도록 설정
-        $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     }
 
-    /**
-     * @return QueryBuilder 쿼리 빌더
-     */
     public function queryBuilder(): QueryBuilder {
         return new QueryBuilder($this->pdo);
     }
-
-    // TODO: 쿼리 실행문 정리 및 Logger 활용
 }

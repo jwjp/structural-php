@@ -1,6 +1,9 @@
-.*
-!.gitignore
-!.ini.example
-!.htaccess
-
+/.ini
+/.env
+/.env.*
+!/.env.example
 /vendor/
+/.idea/
+/.vscode/
+/.runtime/
+*.log

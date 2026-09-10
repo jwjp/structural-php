@@ -4,139 +4,70 @@ namespace App\Controllers\Sample;
 
 use App\Services\Sample\SampleService;
 use App\system\Controller;
-use Exception;
-use JetBrains\PhpStorm\NoReturn;
+use App\system\Response;
 
 class SampleController extends Controller {
-    /**
-     * @return void
-     */
-    #[NoReturn] public function index(): void {
-        $var = ['title' => 'title', 'content' => 'content'];
-        $this->view('sample/index', $var);
+    public function index(): Response {
+        return $this->view('sample/index', ['title' => 'Sample', 'content' => 'Sample Content']);
     }
 
-    /**
-     * @return false|int
-     * @throws Exception
-     */
     public function createFoo(): false|int {
-        $sampleService = new SampleService();
-        return $sampleService->createFoo($this->var['message']);
+        return $this->service()->createFoo($this->var['message'] ?? null);
     }
 
-    /**
-     * @return false|array
-     * @throws Exception
-     */
     public function readFooById(): false|array {
-        $sampleService = new SampleService();
-        return $sampleService->readFooById($this->param['fooId']);
+        return $this->service()->readFooById($this->param['fooId'] ?? null);
     }
 
-    /**
-     * @return array|false
-     */
     public function readFooAll(): array|false {
-        $sampleService = new SampleService();
-        return $sampleService->readFooAll();
+        return $this->service()->readFooAll();
     }
 
-    /**
-     * @return false|int
-     * @throws Exception
-     */
     public function updateFooById(): false|int {
-        $sampleService = new SampleService();
-        return $sampleService->updateFooById($this->var['message'], $this->param['id']);
+        return $this->service()->updateFooById($this->var['message'] ?? null, $this->param['fooId'] ?? null);
     }
 
-    /**
-     * @return false|int
-     * @throws Exception
-     */
     public function deleteFooById(): false|int {
-        $sampleService = new SampleService();
-        return $sampleService->deleteFooById($this->param['id']);
+        return $this->service()->deleteFooById($this->param['fooId'] ?? null);
     }
 
-    /**
-     * @return false|int
-     * @throws Exception
-     */
     public function createBarWithFooId(): false|int {
-        $sampleService = new SampleService();
-        return $sampleService->createBarWithFooId($this->var['comment'], $this->var['fooId']);
+        return $this->service()->createBarWithFooId($this->var['comment'] ?? null, $this->var['fooId'] ?? null);
     }
 
-    /**
-     * @return false|array
-     * @throws Exception
-     */
     public function readBarById(): false|array {
-        $sampleService = new SampleService();
-        return $sampleService->readBarById($this->param['id']);
+        return $this->service()->readBarById($this->param['barId'] ?? null);
     }
 
-    /**
-     * @return false|array
-     */
     public function readBarAll(): false|array {
-        $sampleService = new SampleService();
-        return $sampleService->readBarAll();
+        return $this->service()->readBarAll();
     }
 
-    /**
-     * @return false|int
-     * @throws Exception
-     */
     public function updateBarById(): false|int {
-        $sampleService = new SampleService();
-        return $sampleService->updateBarById($this->var['comment'], $this->param['id']);
+        return $this->service()->updateBarById($this->var['comment'] ?? null, $this->param['barId'] ?? null);
     }
 
-    /**
-     * @return false|int
-     * @throws Exception
-     */
     public function deleteBarById(): false|int {
-        $sampleService = new SampleService();
-        return $sampleService->deleteBarById($this->param['id']);
+        return $this->service()->deleteBarById($this->param['barId'] ?? null);
     }
 
-    /**
-     * @return array
-     * @throws Exception
-     */
-    public function readFooBarByFooIdWithQB(): array {
-        $sampleService = new SampleService();
-        return $sampleService->readFooBarByFooIdWithQB($this->param['fooId']);
+    public function readFooBarByFooIdWithQB(): false|array {
+        return $this->service()->readFooBarByFooIdWithQB($this->param['fooId'] ?? null);
     }
 
-    /**
-     * @return false|int|array|string
-     * @throws Exception
-     */
     public function createFooWithQB(): false|int|array|string {
-        $sampleService = new SampleService();
-        return $sampleService->createFooWithQB($this->var['message']);
+        return $this->service()->createFooWithQB($this->var['message'] ?? null);
     }
 
-    /**
-     * @return bool
-     * @throws Exception
-     */
     public function createFooBarWithQB(): bool {
-        $sampleService = new SampleService();
-        return $sampleService->createFooBarWithQB($this->var['fooMessage'], $this->var['barComment']);
+        return $this->service()->createFooBarWithQB($this->var['fooMessage'] ?? null, $this->var['barComment'] ?? null);
     }
 
-    /**
-     * @return false|int|array|string
-     * @throws Exception
-     */
     public function deleteFooByIdWithQB(): false|int|array|string {
-        $sampleService = new SampleService();
-        return $sampleService->deleteFooByIdWithQB($this->param['fooId']);
+        return $this->service()->deleteFooByIdWithQB($this->param['fooId'] ?? null);
+    }
+
+    protected function service(): SampleService {
+        return new SampleService();
     }
 }
