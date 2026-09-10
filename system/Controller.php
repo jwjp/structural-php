@@ -17,9 +17,10 @@ abstract class Controller {
 
     protected function view(string $view, array $var = [], string $header = 'defaultHeader', string $footer = 'defaultFooter'): Response {
         $root = dirname(__DIR__) . '/public';
+        $view = $this->viewPath($view);
         $files = [
             $root . '/template/' . $this->viewName($header) . '.php',
-            $root . '/' . trim($view, '/') . '.php',
+            $root . '/' . $view . '.php',
             $root . '/template/' . $this->viewName($footer) . '.php',
         ];
 
@@ -47,5 +48,13 @@ abstract class Controller {
             throw new HttpException(500, 'View name is invalid.');
         }
         return $name;
+    }
+
+    private function viewPath(string $path): string {
+        $path = trim($path, '/');
+        if (!preg_match('#^[A-Za-z0-9_-]+(?:/[A-Za-z0-9_-]+)*$#', $path)) {
+            throw new HttpException(500, 'View path is invalid.');
+        }
+        return $path;
     }
 }

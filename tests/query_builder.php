@@ -44,5 +44,6 @@ return [
     },
     'requires where clauses for writes' => static function (): void {
         testThrows(fn () => (new QueryBuilder(testPdo()))->table('foo')->delete()->debug(), InvalidArgumentException::class);
+        testThrows(fn () => (new QueryBuilder(testPdo()))->table('foo')->delete()->where('password', '=', ['secret', 'PASSWORD'])->debug(), InvalidArgumentException::class);
     },
 ];

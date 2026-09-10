@@ -221,7 +221,10 @@ class QueryBuilder {
             $query .= ' ' . implode(' ', $this->joins);
         }
         if ($this->where !== []) {
-            $query .= ' WHERE ' . $this->combineConditions($this->where);
+            $where = $this->combineConditions($this->where);
+            if ($where !== '') {
+                $query .= ' WHERE ' . $where;
+            }
         }
         if ($this->groupBy !== []) {
             $query .= ' GROUP BY ' . implode(', ', $this->groupBy);
@@ -242,10 +245,11 @@ class QueryBuilder {
     }
 
     private function writeQuery(string $query): string {
-        if ($this->where === []) {
+        $where = $this->combineConditions($this->where);
+        if ($where === '') {
             throw new InvalidArgumentException('Write queries require a where condition.');
         }
-        return $query . ' WHERE ' . $this->combineConditions($this->where);
+        return $query . ' WHERE ' . $where;
     }
 
     private function condition(string $left, string $operator, int|string|array|null $right, string $combinator, bool $allowAggregate = false): ?array {
@@ -301,6 +305,9 @@ class QueryBuilder {
 
     private function combineConditions(array $conditions): string {
         $conditions = array_values(array_filter($conditions));
+        if ($conditions === []) {
+            return '';
+        }
         $sql = '';
         foreach ($conditions as $index => $condition) {
             $sql .= ($index === 0 ? '' : ' ' . $condition['combinator'] . ' ') . $condition['sql'];

@@ -23,10 +23,10 @@ class Request {
         return $this->method === 'GET' ? $this->query : $this->body;
     }
 
-    public static function fromGlobals(): self {
+    public static function fromGlobals(?string $rawBodyOverride = null): self {
         $method = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
         $headers = self::headersFromGlobals();
-        $rawBody = file_get_contents('php://input') ?: '';
+        $rawBody = $rawBodyOverride ?? (file_get_contents('php://input') ?: '');
         $body = $_POST;
 
         if ($method === 'POST' && isset($body['_method'])) {
@@ -41,10 +41,13 @@ class Request {
             $contentType = strtolower(strtok($headers['content-type'] ?? '', ';') ?: '');
             if ($contentType === 'application/json') {
                 $decoded = json_decode($rawBody, true);
-                if (!is_array($decoded) && json_last_error() !== JSON_ERROR_NONE) {
+                if (json_last_error() !== JSON_ERROR_NONE) {
                     throw new HttpException(400, 'Request body must contain valid JSON.');
                 }
-                $body = is_array($decoded) ? $decoded : [];
+                if (!is_array($decoded) || array_is_list($decoded)) {
+                    throw new HttpException(400, 'JSON request body must be an object.');
+                }
+                $body = $decoded;
             } elseif ($contentType === 'application/x-www-form-urlencoded' || $contentType === '') {
                 parse_str($rawBody, $body);
             } else {
