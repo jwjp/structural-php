@@ -29,6 +29,7 @@ class HttpException extends RuntimeException {
             404 => 'Not Found',
             405 => 'Method Not Allowed',
             415 => 'Unsupported Media Type',
+            503 => 'Service Unavailable',
             default => $status >= 500 ? 'Internal Server Error' : 'HTTP Error',
         };
     }

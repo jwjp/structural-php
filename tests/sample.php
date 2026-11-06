@@ -32,7 +32,7 @@ class SampleTestModel extends SampleModel {
 }
 
 return [
-    'validates ids before opening a database connection' => static function (): void {
+    'validates ids before calling the model' => static function (): void {
         $service = new SampleService(new SampleTestModel());
         testSame([['id' => 9]], $service->readFooById('9'));
         testThrows(fn () => $service->readFooById('0'), HttpException::class, fn (HttpException $e) => testSame(400, $e->status()));

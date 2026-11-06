@@ -3,71 +3,66 @@
 namespace App\Controllers\Sample;
 
 use App\Services\Sample\SampleService;
-use App\system\Controller;
-use App\system\Response;
+use App\system\Request;
 
-class SampleController extends Controller {
-    public function index(): Response {
-        return $this->view('sample/index', ['title' => 'Sample', 'content' => 'Sample Content']);
-    }
-
-    public function createFoo(): false|int {
-        return $this->service()->createFoo($this->var['message'] ?? null);
-    }
-
-    public function readFooById(): false|array {
-        return $this->service()->readFooById($this->param['fooId'] ?? null);
+/**
+ * JSON actions for the foo/bar sample.
+ *
+ * The service arrives through constructor injection. Route parameters such as
+ * {fooId} arrive as arguments with the same name, and the Request is injected
+ * by type when an action needs the request body.
+ */
+class SampleController {
+    public function __construct(private readonly SampleService $service) {
     }
 
     public function readFooAll(): array|false {
-        return $this->service()->readFooAll();
+        return $this->service->readFooAll();
     }
 
-    public function updateFooById(): false|int {
-        return $this->service()->updateFooById($this->var['message'] ?? null, $this->param['fooId'] ?? null);
+    public function readFooById(string $fooId): false|array {
+        return $this->service->readFooById($fooId);
     }
 
-    public function deleteFooById(): false|int {
-        return $this->service()->deleteFooById($this->param['fooId'] ?? null);
+    public function updateFooById(string $fooId, Request $request): false|int {
+        return $this->service->updateFooById($request->input()['message'] ?? null, $fooId);
     }
 
-    public function createBarWithFooId(): false|int {
-        return $this->service()->createBarWithFooId($this->var['comment'] ?? null, $this->var['fooId'] ?? null);
+    public function createBarWithFooId(Request $request): false|int {
+        $input = $request->input();
+        return $this->service->createBarWithFooId($input['comment'] ?? null, $input['fooId'] ?? null);
     }
 
-    public function readBarById(): false|array {
-        return $this->service()->readBarById($this->param['barId'] ?? null);
+    public function readBarById(string $barId): false|array {
+        return $this->service->readBarById($barId);
     }
 
     public function readBarAll(): false|array {
-        return $this->service()->readBarAll();
+        return $this->service->readBarAll();
     }
 
-    public function updateBarById(): false|int {
-        return $this->service()->updateBarById($this->var['comment'] ?? null, $this->param['barId'] ?? null);
+    public function updateBarById(string $barId, Request $request): false|int {
+        return $this->service->updateBarById($request->input()['comment'] ?? null, $barId);
     }
 
-    public function deleteBarById(): false|int {
-        return $this->service()->deleteBarById($this->param['barId'] ?? null);
+    public function deleteBarById(string $barId): false|int {
+        return $this->service->deleteBarById($barId);
     }
 
-    public function readFooBarByFooIdWithQB(): false|array {
-        return $this->service()->readFooBarByFooIdWithQB($this->param['fooId'] ?? null);
+    public function readFooBarByFooIdWithQB(string $fooId): false|array {
+        return $this->service->readFooBarByFooIdWithQB($fooId);
     }
 
-    public function createFooWithQB(): false|int|array|string {
-        return $this->service()->createFooWithQB($this->var['message'] ?? null);
+    public function createFooWithQB(Request $request): false|int|array|string {
+        return $this->service->createFooWithQB($request->input()['message'] ?? null);
     }
 
-    public function createFooBarWithQB(): bool {
-        return $this->service()->createFooBarWithQB($this->var['fooMessage'] ?? null, $this->var['barComment'] ?? null);
+    public function createFooBarWithQB(Request $request): bool {
+        $input = $request->input();
+        return $this->service->createFooBarWithQB($input['fooMessage'] ?? null, $input['barComment'] ?? null);
     }
 
-    public function deleteFooByIdWithQB(): false|int|array|string {
-        return $this->service()->deleteFooByIdWithQB($this->param['fooId'] ?? null);
-    }
-
-    protected function service(): SampleService {
-        return new SampleService();
+    public function deleteFooByIdWithQB(string $fooId): false|int|array|string {
+        return $this->service->deleteFooByIdWithQB($fooId);
     }
 }

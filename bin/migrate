@@ -1,0 +1,62 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+use App\system\Database;
+use App\system\Database\Migrator;
+use App\system\Ini;
+
+require_once dirname(__DIR__) . '/vendor/autoload.php';
+
+const USAGE = <<<'TEXT'
+    Usage: php bin/migrate <command>
+
+      status               List migrations and whether they have run
+      migrate              Run pending migrations as one batch
+      rollback [batches]   Revert the latest batch (or the latest N batches)
+      make <description>   Create an empty migration file
+
+    The database comes from .ini [DATABASE] or the DB_* environment variables.
+
+    TEXT;
+
+$command = $argv[1] ?? 'help';
+$directory = dirname(__DIR__) . '/database/migrations';
+
+try {
+    if ($command === 'make') {
+        $description = implode(' ', array_slice($argv, 2));
+        $path = Migrator::create($directory, $description);
+        echo 'Created ' . substr($path, strlen(dirname(__DIR__)) + 1) . "\n";
+        exit(0);
+    }
+    if (!in_array($command, ['status', 'migrate', 'rollback'], true)) {
+        fwrite($command === 'help' ? STDOUT : STDERR, USAGE);
+        exit($command === 'help' ? 0 : 1);
+    }
+
+    $migrator = new Migrator(Database::connect((new Ini())->getAll()['DATABASE'] ?? []), $directory);
+    switch ($command) {
+        case 'status':
+            foreach ($migrator->status() as $row) {
+                printf("%-9s %s\n", $row['batch'] === null ? 'pending' : "batch {$row['batch']}", $row['name']);
+            }
+            break;
+        case 'migrate':
+            $ran = $migrator->migrate();
+            echo $ran === [] ? "Nothing to migrate.\n" : implode('', array_map(static fn (string $name): string => "Migrated  {$name}\n", $ran));
+            break;
+        case 'rollback':
+            $batches = filter_var($argv[2] ?? 1, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+            if ($batches === false) {
+                throw new InvalidArgumentException('The number of batches must be a positive integer.');
+            }
+            $reverted = $migrator->rollback($batches);
+            echo $reverted === [] ? "Nothing to roll back.\n" : implode('', array_map(static fn (string $name): string => "Reverted  {$name}\n", $reverted));
+            break;
+    }
+} catch (Throwable $exception) {
+    fwrite(STDERR, $exception->getMessage() . "\n");
+    exit(1);
+}

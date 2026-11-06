@@ -8,13 +8,18 @@ use RuntimeException;
 abstract class Database {
     protected PDO $pdo;
 
+    /**
+     * The container injects the shared PDO connection. Without one, the model
+     * connects with the .ini / DB_* settings itself.
+     */
     public function __construct(?PDO $pdo = null) {
-        if ($pdo !== null) {
-            $this->pdo = $pdo;
-            return;
-        }
+        $this->pdo = $pdo ?? self::connect((new Ini())->getAll()['DATABASE'] ?? []);
+    }
 
-        $settings = (new Ini())->getAll()['DATABASE'] ?? [];
+    /**
+     * Opens a PDO connection from DATABASE settings. DB_* environment variables override them.
+     */
+    public static function connect(mixed $settings): PDO {
         if (!is_array($settings)) {
             throw new RuntimeException('DATABASE must be a configuration section.');
         }
@@ -45,7 +50,7 @@ abstract class Database {
             throw new RuntimeException('The database host, port or name is invalid.');
         }
 
-        $this->pdo = new PDO(
+        return new PDO(
             "mysql:host={$settings['HOST']};port={$port};dbname={$settings['DBNAME']};charset=utf8mb4",
             $settings['USERNAME'],
             $settings['PASSWORD'],

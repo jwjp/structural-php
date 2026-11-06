@@ -1,6 +1,18 @@
 # structural-php
 
-`structural-php` is a small dependency-free PHP MVC project for studying how framework internals fit together. It keeps the runtime stack intentionally thin: Composer is used for PSR-4 autoloading, and the application code uses plain PHP, PDO and MySQL.
+`structural-php` is a small PHP framework built from scratch to study how framework internals work. Each part is short enough to read in one sitting and has its own walkthrough in [`docs/`](docs/):
+
+| Part | Code | Walkthrough |
+| --- | --- | --- |
+| Dependency injection container | `system/Container.php` | [docs/container.md](docs/container.md) |
+| Routing and middleware pipeline | `system/Routing/`, `system/Middleware/`, `system/Kernel.php` | [docs/middleware.md](docs/middleware.md) |
+| Template engine | `system/View/` | [docs/templates.md](docs/templates.md) |
+| Migrations | `system/Database/`, `bin/migrate` | [docs/migrations.md](docs/migrations.md) |
+| Query builder | `system/QueryBuilder.php` | [Query Builder](#query-builder) below |
+
+There are no runtime dependencies. Composer is used only for PSR-4 autoloading; everything else is plain PHP, PDO and MySQL.
+
+If you want a framework that shows how to build an application (sign-up, sessions, CSRF, a board), see [php-mvc](https://github.com/jwjp/php-mvc). This project focuses on the machinery underneath.
 
 ## Requirements
 
@@ -26,57 +38,89 @@ DB_USERNAME=structural_php
 DB_PASSWORD=change-me
 ```
 
-Create the database, then import the schema:
+Create the database, then run the migrations:
 
 ```bash
-mysql -u structural_php -p structural_php < database/schema.sql
+composer migrate -- migrate
 ```
 
-Start the development server:
+Start the development server and open `http://127.0.0.1:8000/`:
 
 ```bash
 composer serve
 ```
 
-Open `http://127.0.0.1:8000/sample/view`.
-
-## Architecture
-
-Requests enter through `public/index.php`, then move through `App\Router`, `App\system\RouterLifecycle`, controllers, services and models.
+## How a request flows
 
 ```text
-public/index.php
-  -> App\Router
-  -> Controller
-  -> Service
-  -> Model
-  -> App\system\Database / QueryBuilder
+public/index.php          Request::fromGlobals()
+  -> App\Application      builds the container, the route table and the global middleware
+  -> Kernel::handle()
+       SecurityHeaders    global middleware, outermost first
+       HandleErrors
+       Routes::match()    404 / 405 / OPTIONS
+       ReadOnlyMode       route middleware (write routes only)
+       SampleController   built by the container; the action's arguments are injected
+  -> Response::send()
 ```
 
-The router now exposes only the routes declared in `src/Router.php`. The old convention-based fallback that mapped URL paths directly to controller classes was removed because it could expose methods unintentionally. The lifecycle still keeps extension points for middleware, guards, interceptors, pipes and filters, but those hooks are intentionally small until a real use case appears.
+`src/Application.php` is the one place where services are registered, and `src/routes.php` is the route table:
 
-Controllers return `Response` objects or plain values. Plain values are encoded as JSON. Views are rendered from files under `public/` and returned as HTML without using globals or terminating the process from inside the controller.
+```php
+$routes->get('/foo/{fooId}', [SampleController::class, 'readFooById'])->name('foo.show');
 
-## Sample Routes
+$routes->group('', function (Routes $routes): void {
+    $routes->post('/foo', [SampleController::class, 'createFooWithQB'])->name('foo.store');
+}, middleware: [ReadOnlyMode::class]);
+```
 
-| Method | Path | Action |
-| --- | --- | --- |
-| `GET` | `/` | Render the sample page |
-| `GET` | `/sample/view` | Render the sample page |
-| `GET` | `/foo` | List active foo rows |
-| `POST` | `/foo` | Create a foo row |
-| `GET` | `/foo/{fooId}` | Read one foo row |
-| `PUT` | `/foo/{fooId}` | Update one foo row |
-| `DELETE` | `/foo/{fooId}` | Soft-delete one foo row |
-| `GET` | `/bar` | List active bar rows |
-| `POST` | `/bar` | Create a bar row for an active foo |
-| `GET` | `/bar/{barId}` | Read one bar row |
-| `PUT` | `/bar/{barId}` | Update one bar row |
-| `DELETE` | `/bar/{barId}` | Soft-delete one bar row |
-| `GET` | `/foobar/{fooId}` | Read active bars for an active foo |
-| `POST` | `/foobar` | Create related foo and bar rows in one transaction |
+Controllers are plain classes. Constructor dependencies are injected by type, route parameters arrive as arguments with the same name, and the `Request` is injected when an action asks for it:
 
-JSON and `application/x-www-form-urlencoded` request bodies are supported. `POST` requests with `_method=PUT`, `_method=PATCH` or `_method=DELETE` are still accepted for form compatibility.
+```php
+class SampleController {
+    public function __construct(private readonly SampleService $service) {
+    }
+
+    public function readFooById(string $fooId): false|array {
+        return $this->service->readFooById($fooId);
+    }
+
+    public function createFooWithQB(Request $request): false|int|array|string {
+        return $this->service->createFooWithQB($request->input()['message'] ?? null);
+    }
+}
+```
+
+An action returns a `Response`, or any other value, which is encoded as JSON. `HttpException` messages are shown to clients; any other exception is logged and becomes a generic 500.
+
+## Configuration
+
+| Setting | Meaning |
+| --- | --- |
+| `[DATABASE]` `HOST`, `PORT`, `DBNAME`, `USERNAME`, `PASSWORD` | Connection settings. `DB_*` environment variables override them. |
+| `[APP]` `READ_ONLY` | `"true"` makes write routes answer `503`. It is an example of route middleware. |
+
+Compiled templates are cached in `.runtime/views/`, which is ignored by Git. The web server needs write access to it.
+
+## Sample routes
+
+| Method | Path | Name | Action |
+| --- | --- | --- | --- |
+| `GET` | `/`, `/sample/view` | `home`, `sample.view` | Render the sample page |
+| `GET` | `/foo` | `foo.index` | List active foo rows |
+| `POST` | `/foo` | `foo.store` | Create a foo row |
+| `GET` | `/foo/{fooId}` | `foo.show` | Read one foo row |
+| `PUT` | `/foo/{fooId}` | `foo.update` | Update one foo row |
+| `DELETE` | `/foo/{fooId}` | `foo.destroy` | Soft-delete one foo row |
+| `GET` | `/bar` | `bar.index` | List active bar rows |
+| `POST` | `/bar` | `bar.store` | Create a bar row for an active foo |
+| `GET` | `/bar/{barId}` | `bar.show` | Read one bar row |
+| `PUT` | `/bar/{barId}` | `bar.update` | Update one bar row |
+| `DELETE` | `/bar/{barId}` | `bar.destroy` | Soft-delete one bar row |
+| `GET` | `/foobar/{fooId}` | `foobar.show` | Read active bars for an active foo |
+| `POST` | `/foobar` | `foobar.store` | Create related foo and bar rows in one transaction |
+
+JSON and `application/x-www-form-urlencoded` request bodies are supported. `POST` requests with `_method=PUT`, `_method=PATCH` or `_method=DELETE` are accepted for HTML forms.
 
 ## Query Builder
 
@@ -93,14 +137,12 @@ Identifier and sort inputs are validated before SQL is generated. Write queries 
 
 ## Tests
 
-Run the default test suite:
-
 ```bash
-composer test
 composer lint
+composer test
 ```
 
-Run MySQL integration tests when a disposable database is available:
+The MySQL integration tests run the migrations, roll them back and send requests through the kernel. They drop and recreate tables, so use a disposable database:
 
 ```bash
 TEST_MYSQL_DSN='mysql:host=127.0.0.1;port=3306;dbname=structural_php_test;charset=utf8mb4' \
@@ -109,8 +151,19 @@ TEST_MYSQL_PASSWORD= \
 composer test:mysql
 ```
 
-The MySQL test drops and recreates the `foo` and `bar` tables in the selected database. Use a disposable database only.
+GitHub Actions runs all three on PHP 8.2 and 8.3 with a MySQL 8 service.
+
+## Upgrading from the lifecycle router
+
+Earlier versions used `RouterLifecycle` with fixed `middleware()`, `guard()`, `interceptor()`, `pipe()` and `filter()` hooks, a `Controller` base class and PHP views under `public/`.
+
+- Declare routes in `src/routes.php` with `$routes->get()` and friends instead of `exec()` inside `get()` / `post()` methods.
+- Move hook code into middleware classes. `filter()` became `HandleErrors`.
+- Controllers no longer extend `Controller`. Take dependencies in the constructor and read route parameters and the request from action arguments.
+- Views live in `views/*.tpl` and use the template syntax. `public/` now holds only the front controller and static assets.
+- `database/schema.sql` became the first migration. On a database created from the old schema, record it as applied instead of running it:
+  `INSERT INTO migrations (name, batch) VALUES ('2025_08_18_000000_create_foo_and_bar_tables', 1);` after running `composer migrate -- status` once to create the table.
 
 ## Notes
 
-This project is still a learning framework rather than a production web framework. The extension points are deliberately simple, and the sample domain exists to exercise routing, validation, transactions and soft deletion.
+This is a learning framework, not a production one. The parts are deliberately small; each walkthrough ends with what a production implementation adds.

@@ -4,6 +4,9 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   php:
     runs-on: ubuntu-latest
@@ -12,9 +15,25 @@ jobs:
       matrix:
         php-version: ['8.2', '8.3']
 
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: structural_php_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -31,3 +50,10 @@ jobs:
 
       - name: Test
         run: composer test
+
+      - name: MySQL integration tests
+        env:
+          TEST_MYSQL_DSN: mysql:host=127.0.0.1;port=3306;dbname=structural_php_test;charset=utf8mb4
+          TEST_MYSQL_USER: root
+          TEST_MYSQL_PASSWORD: root
+        run: composer test:mysql

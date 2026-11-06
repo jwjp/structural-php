@@ -6,84 +6,79 @@ use App\Models\Sample\SampleModel;
 use App\system\HttpException;
 
 class SampleService {
-    public function __construct(private ?SampleModel $sampleModel = null) {
+    public function __construct(private readonly SampleModel $sampleModel) {
     }
 
     public function createFoo(mixed $message): false|int {
         $message = $this->text($message, 'message');
-        return $this->model()->createFoo($message);
+        return $this->sampleModel->createFoo($message);
     }
 
     public function readFooById(mixed $id): false|array {
         $id = $this->positiveId($id, 'fooId');
-        return $this->model()->readFooById($id);
+        return $this->sampleModel->readFooById($id);
     }
 
     public function readFooAll(): false|array {
-        return $this->model()->readFooAll();
+        return $this->sampleModel->readFooAll();
     }
 
     public function updateFooById(mixed $message, mixed $id): false|int {
         $id = $this->positiveId($id, 'fooId');
         $message = $this->text($message, 'message');
-        return $this->model()->updateFooById($message, $id);
+        return $this->sampleModel->updateFooById($message, $id);
     }
 
     public function deleteFooById(mixed $id): false|int {
         $id = $this->positiveId($id, 'fooId');
-        return $this->model()->deleteFooById($id);
+        return $this->sampleModel->deleteFooById($id);
     }
 
     public function createBarWithFooId(mixed $comment, mixed $fooId): false|int {
         $fooId = $this->positiveId($fooId, 'fooId');
         $comment = $this->text($comment, 'comment');
-        return $this->model()->createBarWithFooId($comment, $fooId);
+        return $this->sampleModel->createBarWithFooId($comment, $fooId);
     }
 
     public function readBarById(mixed $id): false|array {
         $id = $this->positiveId($id, 'barId');
-        return $this->model()->readBarById($id);
+        return $this->sampleModel->readBarById($id);
     }
 
     public function readBarAll(): false|array {
-        return $this->model()->readBarAll();
+        return $this->sampleModel->readBarAll();
     }
 
     public function updateBarById(mixed $comment, mixed $id): false|int {
         $id = $this->positiveId($id, 'barId');
         $comment = $this->text($comment, 'comment');
-        return $this->model()->updateBarById($comment, $id);
+        return $this->sampleModel->updateBarById($comment, $id);
     }
 
     public function deleteBarById(mixed $id): false|int {
         $id = $this->positiveId($id, 'barId');
-        return $this->model()->deleteBarById($id);
+        return $this->sampleModel->deleteBarById($id);
     }
 
     public function readFooBarByFooIdWithQB(mixed $fooId): false|array {
         $fooId = $this->positiveId($fooId, 'fooId');
-        return $this->model()->readFooBarByFooIdWithQB($fooId);
+        return $this->sampleModel->readFooBarByFooIdWithQB($fooId);
     }
 
     public function createFooWithQB(mixed $message): false|array|int|string {
         $message = $this->text($message, 'message');
-        return $this->model()->createFooWithQB($message);
+        return $this->sampleModel->createFooWithQB($message);
     }
 
     public function createFooBarWithQB(mixed $fooMessage, mixed $barComment): bool {
         $fooMessage = $this->text($fooMessage, 'fooMessage');
         $barComment = $this->text($barComment, 'barComment');
-        return $this->model()->createFooBarWithQB($fooMessage, $barComment);
+        return $this->sampleModel->createFooBarWithQB($fooMessage, $barComment);
     }
 
     public function deleteFooByIdWithQB(mixed $fooId): false|array|int|string {
         $fooId = $this->positiveId($fooId, 'fooId');
-        return $this->model()->deleteFooByIdWithQB($fooId);
-    }
-
-    private function model(): SampleModel {
-        // Validation completes before the first database connection is opened.
-        return $this->sampleModel ??= new SampleModel();
+        return $this->sampleModel->deleteFooByIdWithQB($fooId);
     }
 
     private function positiveId(mixed $value, string $field): int {

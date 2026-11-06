@@ -1,6 +1,6 @@
 {
   "name": "jiwonio/structural-php",
-  "description": "A dependency-free PHP MVC framework for exploring routing, request lifecycles and PDO queries",
+  "description": "A dependency-free PHP framework built from scratch to study a DI container, middleware pipeline, template engine and migrations",
   "license": "Unlicense",
   "type": "project",
   "autoload": {
@@ -13,6 +13,7 @@
     "test": "@php tests/run.php",
     "test:mysql": "@php tests/mysql.php",
     "lint": "@php tests/lint.php",
+    "migrate": "@php bin/migrate",
     "serve": "@php -S 127.0.0.1:8000 -t public public/index.php"
   },
   "require": {

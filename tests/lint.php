@@ -2,7 +2,7 @@
 
 $root = dirname(__DIR__);
 $files = [];
-foreach (['system', 'src', 'public', 'tests'] as $directory) {
+foreach (['system', 'src', 'public', 'tests', 'database'] as $directory) {
     $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(
         "{$root}/{$directory}", FilesystemIterator::SKIP_DOTS
     ));
@@ -12,6 +12,7 @@ foreach (['system', 'src', 'public', 'tests'] as $directory) {
         }
     }
 }
+$files[] = "{$root}/bin/migrate";
 sort($files);
 foreach ($files as $file) {
     $pipes = [];
